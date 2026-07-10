@@ -76,16 +76,18 @@ export default function DashboardLinks() {
   async function move(index: number, direction: -1 | 1) {
     const target = index + direction
     if (target < 0 || target >= links.length) return
-    const a = links[index]
-    const b = links[target]
     const reordered = [...links]
-    reordered[index] = b
-    reordered[target] = a
+    const [moved] = reordered.splice(index, 1)
+    reordered.splice(target, 0, moved)
     setLinks(reordered)
-    await Promise.all([
-      supabase.from('links').update({ position: b.position }).eq('id', a.id),
-      supabase.from('links').update({ position: a.position }).eq('id', b.id),
-    ])
+    // Renumber every link from the new array order instead of swapping just
+    // the two positions involved — a plain swap silently does nothing if the
+    // two rows already share a position (which happened here from a prior
+    // bug), and re-deriving positions from the array each time is
+    // self-healing against any duplicate/out-of-sync values already in the DB.
+    await Promise.all(
+      reordered.map((link, i) => supabase.from('links').update({ position: i }).eq('id', link.id)),
+    )
   }
 
   async function handleDelete(id: string) {
