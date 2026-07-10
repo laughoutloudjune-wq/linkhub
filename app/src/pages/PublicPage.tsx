@@ -85,7 +85,11 @@ export default function PublicPage() {
   return (
     <ThemeVars profile={profile}>
       <div className="mx-auto max-w-[430px] px-6 pt-24 pb-18 flex flex-col items-center">
-        <div className="h-22 w-22 rounded-full bg-[repeating-linear-gradient(45deg,#ddd,#ddd_4px,#eee_4px,#eee_8px)]" />
+        {profile.avatar_url ? (
+          <img src={profile.avatar_url} alt="" className="h-22 w-22 rounded-full object-cover" />
+        ) : (
+          <div className="h-22 w-22 rounded-full bg-[repeating-linear-gradient(45deg,#ddd,#ddd_4px,#eee_4px,#eee_8px)]" />
+        )}
         <div className="mt-4 flex items-center gap-1.5">
           <h1 className="text-[27px] font-semibold">{profile.name}</h1>
           <span

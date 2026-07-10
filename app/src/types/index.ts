@@ -9,6 +9,7 @@ export interface Profile {
   accent_color: string
   background_type: BackgroundType
   background_value: string
+  custom_platforms: string[]
   created_at: string
 }
 
