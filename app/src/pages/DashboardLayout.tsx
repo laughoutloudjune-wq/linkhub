@@ -11,7 +11,7 @@ const navItems = [
 
 export default function DashboardLayout() {
   const { session, loading: authLoading } = useAuth()
-  const { profile } = useProfile(session?.user.id)
+  const { profile } = useProfile(session?.user.id, session?.user.email)
 
   if (authLoading) return <div className="p-10 text-center text-sm text-neutral-500">Loading…</div>
   if (!session) return <Navigate to="/login" replace />

@@ -6,17 +6,28 @@ import type { BackgroundType } from '../types'
 
 const ACCENT_PRESETS = ['#E7A8A3', '#B9A6E8', '#9FDFC9', '#F3B6D3', '#D9B7A3', '#8AB4E8']
 
+function slugifyInput(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9-]+/g, '-')
+}
+
 export default function DashboardSettings() {
   const { session } = useAuth()
-  const { profile, refresh } = useProfile(session?.user.id)
+  const { profile, refresh } = useProfile(session?.user.id, session?.user.email)
+  const [name, setName] = useState(profile?.name ?? '')
+  const [slug, setSlug] = useState(profile?.slug ?? '')
+  const [bio, setBio] = useState(profile?.bio ?? '')
   const [accentColor, setAccentColor] = useState(profile?.accent_color ?? '#E7A8A3')
   const [backgroundType, setBackgroundType] = useState<BackgroundType>(profile?.background_type ?? 'color')
   const [backgroundValue, setBackgroundValue] = useState(profile?.background_value ?? '#FBF4F1')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!profile) return
+    setName(profile.name)
+    setSlug(profile.slug)
+    setBio(profile.bio ?? '')
     setAccentColor(profile.accent_color)
     setBackgroundType(profile.background_type)
     setBackgroundValue(profile.background_value)
@@ -25,11 +36,23 @@ export default function DashboardSettings() {
   async function handleSave() {
     if (!session) return
     setSaving(true)
-    await supabase
+    setError(null)
+    const { error } = await supabase
       .from('profiles')
-      .update({ accent_color: accentColor, background_type: backgroundType, background_value: backgroundValue })
+      .update({
+        name,
+        slug,
+        bio: bio || null,
+        accent_color: accentColor,
+        background_type: backgroundType,
+        background_value: backgroundValue,
+      })
       .eq('id', session.user.id)
-    await refresh()
+    if (error) {
+      setError(error.code === '23505' ? 'That URL slug is already taken.' : error.message)
+    } else {
+      await refresh()
+    }
     setSaving(false)
   }
 
@@ -51,6 +74,40 @@ export default function DashboardSettings() {
 
   return (
     <div className="flex max-w-xl flex-col gap-8">
+      <div>
+        <h2 className="mb-3 text-sm font-medium">Profile</h2>
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1 text-xs text-neutral-500">
+            Clinic name
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="rounded-lg border border-black/10 px-3 py-2 text-sm text-black"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-neutral-500">
+            Public page URL
+            <div className="flex items-center gap-1 rounded-lg border border-black/10 px-3 py-2 text-sm">
+              <span className="text-neutral-400">linkhub.co/</span>
+              <input
+                value={slug}
+                onChange={(e) => setSlug(slugifyInput(e.target.value))}
+                className="flex-1 text-black outline-none"
+              />
+            </div>
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-neutral-500">
+            Bio
+            <input
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Medical aesthetics & skincare studio"
+              className="rounded-lg border border-black/10 px-3 py-2 text-sm text-black"
+            />
+          </label>
+        </div>
+      </div>
+
       <div>
         <h2 className="mb-3 text-sm font-medium">Accent color</h2>
         <div className="flex flex-wrap items-center gap-2">
@@ -134,14 +191,17 @@ export default function DashboardSettings() {
         </div>
       </div>
 
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="w-fit rounded-full px-6 py-2.5 text-sm font-semibold text-white"
-        style={{ background: accentColor }}
-      >
-        {saving ? 'Saving…' : 'Save changes'}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="w-fit rounded-full px-6 py-2.5 text-sm font-semibold text-white"
+          style={{ background: accentColor }}
+        >
+          {saving ? 'Saving…' : 'Save changes'}
+        </button>
+        {error && <span className="text-sm text-red-600">{error}</span>}
+      </div>
     </div>
   )
 }
