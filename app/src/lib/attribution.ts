@@ -44,9 +44,15 @@ export function captureAttribution(): Attribution {
   return attribution
 }
 
-export function getDeviceType(): 'mobile' | 'tablet' | 'desktop' {
+export function getPlatform(): string {
   const ua = navigator.userAgent
-  if (/tablet|ipad/i.test(ua)) return 'tablet'
-  if (/mobi|android|iphone/i.test(ua)) return 'mobile'
-  return 'desktop'
+
+  if (/iPhone/i.test(ua)) return 'iOS'
+  // iPadOS 13+ reports as "Macintosh" in desktop mode, distinguishable by touch support.
+  if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) return 'iPadOS'
+  if (/Android/i.test(ua)) return 'Android'
+  if (/Windows/i.test(ua)) return 'Windows'
+  if (/Macintosh|Mac OS X/i.test(ua)) return 'macOS'
+  if (/Linux/i.test(ua)) return 'Linux'
+  return 'Other'
 }

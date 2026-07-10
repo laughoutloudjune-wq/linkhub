@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { captureAttribution, getDeviceType } from '../lib/attribution'
+import { captureAttribution, getPlatform } from '../lib/attribution'
 import { ThemeVars } from '../components/ThemeVars'
 import type { Link, Profile } from '../types'
 
@@ -45,7 +45,7 @@ export default function PublicPage() {
         source: attribution.source,
         campaign: attribution.campaign,
         referrer: attribution.referrer,
-        device: getDeviceType(),
+        device: getPlatform(),
       })
     }
 
@@ -76,7 +76,7 @@ export default function PublicPage() {
         source: attribution.source,
         campaign: attribution.campaign,
         referrer: attribution.referrer,
-        device: getDeviceType(),
+        device: getPlatform(),
       })
       .then()
   }
