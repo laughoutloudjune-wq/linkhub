@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { captureAttribution, getPlatform } from '../lib/attribution'
+import { trackEvent } from '../lib/track'
 import { ThemeVars } from '../components/ThemeVars'
 import type { Link, Profile } from '../types'
 
@@ -40,8 +41,9 @@ export default function PublicPage() {
       setLoading(false)
 
       const attribution = captureAttribution()
-      await supabase.from('page_view_events').insert({
-        profile_id: profileData.id,
+      trackEvent({
+        type: 'page_view',
+        profileId: profileData.id,
         source: attribution.source,
         campaign: attribution.campaign,
         referrer: attribution.referrer,
@@ -63,22 +65,18 @@ export default function PublicPage() {
     setTimeout(() => setTrackedLinkId(null), 1000)
 
     // Open synchronously, in the same click-gesture tick — awaiting the
-    // tracking insert first causes browsers to block the popup.
+    // tracking call first causes browsers to block the popup.
     window.open(link.url, '_blank', 'noopener,noreferrer')
 
-    // supabase-js query builders are lazy (the request fires inside .then()),
-    // so this must be explicitly triggered rather than just constructed.
-    supabase
-      .from('click_events')
-      .insert({
-        link_id: link.id,
-        profile_id: profile.id,
-        source: attribution.source,
-        campaign: attribution.campaign,
-        referrer: attribution.referrer,
-        device: getPlatform(),
-      })
-      .then()
+    trackEvent({
+      type: 'click',
+      profileId: profile.id,
+      linkId: link.id,
+      source: attribution.source,
+      campaign: attribution.campaign,
+      referrer: attribution.referrer,
+      device: getPlatform(),
+    })
   }
 
   if (loading) return <div className="p-10 text-center text-sm text-[var(--muted)]">Loading…</div>
