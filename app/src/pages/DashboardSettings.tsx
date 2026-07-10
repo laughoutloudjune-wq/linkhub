@@ -6,8 +6,64 @@ import type { BackgroundType } from '../types'
 
 const ACCENT_PRESETS = ['#E7A8A3', '#B9A6E8', '#9FDFC9', '#F3B6D3', '#D9B7A3', '#8AB4E8']
 
+const SHARE_PLATFORMS = [
+  { key: 'instagram', label: 'Instagram' },
+  { key: 'tiktok', label: 'TikTok' },
+  { key: 'facebook', label: 'Facebook' },
+  { key: 'twitter', label: 'Twitter / X' },
+  { key: 'youtube', label: 'YouTube' },
+  { key: 'email', label: 'Email signature' },
+]
+
 function slugifyInput(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9-]+/g, '-')
+}
+
+function ShareLinks({ slug }: { slug: string }) {
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  async function handleCopy(key: string, url: string) {
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      const textarea = document.createElement('textarea')
+      textarea.value = url
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
+    setCopiedKey(key)
+    setTimeout(() => setCopiedKey((current) => (current === key ? null : current)), 1500)
+  }
+
+  return (
+    <div>
+      <h2 className="mb-1 text-sm font-medium">Share links</h2>
+      <p className="mb-3 text-xs text-neutral-500">
+        Use a different tagged link per platform so the Overview dashboard can tell you where clicks came from.
+      </p>
+      <div className="flex flex-col gap-2">
+        {SHARE_PLATFORMS.map(({ key, label }) => {
+          const url = `${window.location.origin}/${slug}?utm_source=${key}`
+          return (
+            <div key={key} className="flex items-center gap-2 rounded-lg border border-black/10 px-3 py-2">
+              <span className="w-32 shrink-0 text-xs font-medium text-neutral-600">{label}</span>
+              <span className="flex-1 truncate text-xs text-neutral-500">{url}</span>
+              <button
+                onClick={() => handleCopy(key, url)}
+                className="shrink-0 rounded-full bg-black/5 px-3 py-1 text-xs font-medium text-neutral-700 hover:bg-black/10"
+              >
+                {copiedKey === key ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 export default function DashboardSettings() {
@@ -88,13 +144,24 @@ export default function DashboardSettings() {
           <label className="flex flex-col gap-1 text-xs text-neutral-500">
             Public page URL
             <div className="flex items-center gap-1 rounded-lg border border-black/10 px-3 py-2 text-sm">
-              <span className="text-neutral-400">linkhub.co/</span>
+              <span className="text-neutral-400">{window.location.host}/</span>
               <input
                 value={slug}
                 onChange={(e) => setSlug(slugifyInput(e.target.value))}
                 className="flex-1 text-black outline-none"
               />
             </div>
+            {profile && (
+              <a
+                href={`/${profile.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 w-fit text-xs underline"
+                style={{ color: 'var(--accent, #3A2E2E)' }}
+              >
+                View live page ↗
+              </a>
+            )}
           </label>
           <label className="flex flex-col gap-1 text-xs text-neutral-500">
             Bio
@@ -107,6 +174,8 @@ export default function DashboardSettings() {
           </label>
         </div>
       </div>
+
+      {profile?.slug && <ShareLinks slug={profile.slug} />}
 
       <div>
         <h2 className="mb-3 text-sm font-medium">Accent color</h2>

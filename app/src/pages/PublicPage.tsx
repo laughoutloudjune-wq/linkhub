@@ -55,23 +55,30 @@ export default function PublicPage() {
     }
   }, [slug])
 
-  async function handleLinkClick(link: Link) {
+  function handleLinkClick(link: Link) {
     if (!profile) return
     const attribution = captureAttribution()
 
     setTrackedLinkId(link.id)
     setTimeout(() => setTrackedLinkId(null), 1000)
 
-    await supabase.from('click_events').insert({
-      link_id: link.id,
-      profile_id: profile.id,
-      source: attribution.source,
-      campaign: attribution.campaign,
-      referrer: attribution.referrer,
-      device: getDeviceType(),
-    })
-
+    // Open synchronously, in the same click-gesture tick — awaiting the
+    // tracking insert first causes browsers to block the popup.
     window.open(link.url, '_blank', 'noopener,noreferrer')
+
+    // supabase-js query builders are lazy (the request fires inside .then()),
+    // so this must be explicitly triggered rather than just constructed.
+    supabase
+      .from('click_events')
+      .insert({
+        link_id: link.id,
+        profile_id: profile.id,
+        source: attribution.source,
+        campaign: attribution.campaign,
+        referrer: attribution.referrer,
+        device: getDeviceType(),
+      })
+      .then()
   }
 
   if (loading) return <div className="p-10 text-center text-sm text-[var(--muted)]">Loading…</div>
