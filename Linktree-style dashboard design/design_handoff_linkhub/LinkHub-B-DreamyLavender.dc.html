@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;500;600;700&display=swap">
+<style>
+  body{margin:0}
+  @keyframes lh-fade{0%{opacity:0;transform:translateY(4px)}15%{opacity:1;transform:translateY(0)}80%{opacity:1}100%{opacity:0}}
+</style>
+</helmet>
+
+<div style="font-family:'Nunito',sans-serif;background:linear-gradient(160deg,#F1EEFA 0%,#EAF6F1 100%);min-height:100vh;color:#372F4D;position:relative;">
+
+  <div style="position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:50;background:rgba(255,255,255,0.7);backdrop-filter:blur(10px);border:1px solid rgba(185,166,232,0.4);border-radius:999px;padding:5px;display:flex;gap:4px;box-shadow:0 8px 24px rgba(185,166,232,0.25);">
+    <button onClick="{{ goPublic }}" style="{{ publicBtnStyle }}">Public Page</button>
+    <button onClick="{{ goDashboard }}" style="{{ dashBtnStyle }}">Dashboard</button>
+  </div>
+
+  <sc-if value="{{ isPublic }}" hint-placeholder-val="{{ true }}">
+  <div style="max-width:440px;margin:0 auto;padding:100px 24px 72px;text-align:center;" data-screen-label="Public Link Page">
+
+    <div style="width:96px;height:96px;border-radius:32px;margin:0 auto 20px;overflow:hidden;position:relative;border:3px solid #fff;box-shadow:0 10px 28px rgba(185,166,232,0.3);">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <defs>
+          <linearGradient id="gradB" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#DCCFF2"/>
+            <stop offset="1" stop-color="#BFEBDA"/>
+          </linearGradient>
+          <pattern id="stripesB" width="12" height="12" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <rect width="12" height="12" fill="url(#gradB)"/>
+            <rect width="6" height="12" fill="#EDE6F8"/>
+          </pattern>
+        </defs>
+        <rect width="96" height="96" fill="url(#stripesB)"/>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:500 8px/1 ui-monospace,monospace;color:#6B5F94;letter-spacing:.02em;background:rgba(255,255,255,0.4);">clinic photo</div>
+    </div>
+
+    <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;">
+      <h1 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:27px;margin:0;color:#372F4D;">Bella Aesthetics</h1>
+      <span style="width:17px;height:17px;border-radius:50%;background:#B9A6E8;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">✓</span>
+    </div>
+    <p style="margin:0 0 30px;font-size:14px;color:#8A7FA8;line-height:1.5;">Medical aesthetics &amp; skincare studio ✧ Downtown &amp; Riverside</p>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <sc-for list="{{ activeLinks }}" as="item" hint-placeholder-count="6">
+        <div style="position:relative;">
+          <button onClick="{{ item.onClick }}" style="width:100%;transform:scale({{ item.scale }});transition:transform .18s ease;padding:17px 20px;border-radius:22px;border:none;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);color:#372F4D;font:600 15px 'Nunito',sans-serif;cursor:pointer;box-shadow:0 6px 18px rgba(185,166,232,0.22);">
+            {{ item.title }}
+          </button>
+          <sc-if value="{{ item.isPulse }}">
+            <span style="position:absolute;right:14px;top:-10px;background:#372F4D;color:#fff;font-size:10px;padding:3px 9px;border-radius:999px;animation:lh-fade 1.1s ease forwards;">Click tracked</span>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <p style="margin:40px 0 0;font-size:11px;color:#A79BC8;letter-spacing:.03em;">POWERED BY LINKHUB</p>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isDashboard }}">
+  <div style="display:flex;min-height:100vh;padding-top:64px;" data-screen-label="Dashboard">
+
+    <div style="width:224px;flex:none;background:linear-gradient(180deg,#C9B8ED 0%,#A6D9C8 100%);padding:28px 18px;display:flex;flex-direction:column;gap:24px;">
+      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;padding:0 8px;color:#fff;">LinkHub</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button onClick="{{ goOverview }}" style="{{ navOverviewStyle }}">Overview</button>
+        <button onClick="{{ goLinksTab }}" style="{{ navLinksStyle }}">Links</button>
+      </div>
+      <div style="margin-top:auto;padding:14px;border-radius:18px;background:rgba(255,255,255,0.3);font-size:12px;color:#fff;line-height:1.5;">Viewing analytics for <strong>Bella Aesthetics</strong></div>
+    </div>
+
+    <div style="flex:1;padding:32px 40px;overflow:auto;">
+
+      <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;">Overview</h2>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+          <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:22px;padding:18px 20px;box-shadow:0 4px 16px rgba(185,166,232,0.12);">
+            <div style="font-size:12px;color:#8A7FA8;margin-bottom:6px;">Profile Views</div>
+            <div style="font-size:26px;font-weight:700;">{{ profileViews }}</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:22px;padding:18px 20px;box-shadow:0 4px 16px rgba(185,166,232,0.12);">
+            <div style="font-size:12px;color:#8A7FA8;margin-bottom:6px;">Total Clicks</div>
+            <div style="font-size:26px;font-weight:700;">{{ totalClicks }}</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:22px;padding:18px 20px;box-shadow:0 4px 16px rgba(185,166,232,0.12);">
+            <div style="font-size:12px;color:#8A7FA8;margin-bottom:6px;">Click Rate</div>
+            <div style="font-size:26px;font-weight:700;">{{ ctr }}%</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#B9A6E8,#9FDFC9);border-radius:22px;padding:18px 20px;color:#fff;">
+            <div style="font-size:12px;opacity:.9;margin-bottom:6px;">Top Link</div>
+            <div style="font-size:17px;font-weight:700;">{{ topLink.title }}</div>
+            <div style="font-size:12px;opacity:.9;margin-top:2px;">{{ topLink.clicks }} clicks</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:22px;padding:22px 24px;margin-bottom:24px;box-shadow:0 4px 16px rgba(185,166,232,0.12);">
+          <div style="font-size:13px;color:#8A7FA8;margin-bottom:14px;">Clicks — last 14 days</div>
+          <svg viewBox="0 0 600 160" width="100%" height="160" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="lineGradB" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#B9A6E8"/>
+                <stop offset="1" stop-color="#9FDFC9"/>
+              </linearGradient>
+            </defs>
+            <polygon points="{{ areaPoints }}" fill="#B9A6E8" opacity="0.14"></polygon>
+            <polyline points="{{ chartPoints }}" fill="none" stroke="url(#lineGradB)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          </svg>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:22px;padding:22px 24px;margin-bottom:24px;box-shadow:0 4px 16px rgba(185,166,232,0.12);">
+          <div style="font-size:13px;color:#8A7FA8;margin-bottom:14px;">Clicks per link</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <sc-for list="{{ sortedLinks }}" as="item" hint-placeholder-count="7">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span>{{ item.title }}</span><span style="color:#8A7FA8;">{{ item.clicks }}</span></div>
+                <div style="height:9px;border-radius:999px;background:rgba(185,166,232,0.15);overflow:hidden;"><div style="height:100%;border-radius:999px;background:linear-gradient(90deg,#B9A6E8,#9FDFC9);width:{{ item.pct }}%;"></div></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+          <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:22px;padding:20px;box-shadow:0 4px 16px rgba(185,166,232,0.12);">
+            <div style="font-size:13px;color:#8A7FA8;margin-bottom:12px;">Device</div>
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <sc-for list="{{ devices }}" as="d" hint-placeholder-count="3">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>{{ d.label }}</span><span style="color:#8A7FA8;">{{ d.pct }}%</span></div>
+                  <div style="height:7px;border-radius:999px;background:rgba(185,166,232,0.15);overflow:hidden;"><div style="height:100%;background:#9FDFC9;width:{{ d.pct }}%;"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:22px;padding:20px;box-shadow:0 4px 16px rgba(185,166,232,0.12);">
+            <div style="font-size:13px;color:#8A7FA8;margin-bottom:12px;">Location</div>
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <sc-for list="{{ locations }}" as="loc" hint-placeholder-count="5">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>{{ loc.label }}</span><span style="color:#8A7FA8;">{{ loc.pct }}%</span></div>
+                  <div style="height:7px;border-radius:999px;background:rgba(185,166,232,0.15);overflow:hidden;"><div style="height:100%;background:#B9A6E8;width:{{ loc.pct }}%;"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:22px;padding:20px;box-shadow:0 4px 16px rgba(185,166,232,0.12);">
+            <div style="font-size:13px;color:#8A7FA8;margin-bottom:12px;">Referral source</div>
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <sc-for list="{{ referrals }}" as="r" hint-placeholder-count="5">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>{{ r.label }}</span><span style="color:#8A7FA8;">{{ r.pct }}%</span></div>
+                  <div style="height:7px;border-radius:999px;background:rgba(185,166,232,0.15);overflow:hidden;"><div style="height:100%;background:#F3B6D3;width:{{ r.pct }}%;"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isLinksTab }}">
+      <div>
+        <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;">Links</h2>
+
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:22px;padding:20px 22px;margin-bottom:22px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 16px rgba(185,166,232,0.12);">
+          <input value="{{ newTitle }}" onChange="{{ updateNewTitle }}" placeholder="Link title" style="flex:1;padding:11px 14px;border-radius:14px;border:1px solid rgba(185,166,232,0.35);font:14px 'Nunito',sans-serif;outline:none;background:#fff;"></input>
+          <input value="{{ newUrl }}" onChange="{{ updateNewUrl }}" placeholder="URL" style="flex:1;padding:11px 14px;border-radius:14px;border:1px solid rgba(185,166,232,0.35);font:14px 'Nunito',sans-serif;outline:none;background:#fff;"></input>
+          <button onClick="{{ addLink }}" style="padding:11px 20px;border-radius:14px;border:none;background:linear-gradient(135deg,#B9A6E8,#9FDFC9);color:#fff;font:700 14px 'Nunito',sans-serif;cursor:pointer;white-space:nowrap;">+ Add link</button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ linksWithMeta }}" as="item" hint-placeholder-count="7">
+            <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 10px rgba(185,166,232,0.1);">
+              <div style="display:flex;flex-direction:column;gap:3px;">
+                <button onClick="{{ item.onMoveUp }}" style="border:none;background:none;cursor:pointer;color:#A79BC8;font-size:11px;line-height:1;">▲</button>
+                <button onClick="{{ item.onMoveDown }}" style="border:none;background:none;cursor:pointer;color:#A79BC8;font-size:11px;line-height:1;">▼</button>
+              </div>
+              <input value="{{ item.title }}" onChange="{{ item.onTitleChange }}" style="width:190px;padding:9px 12px;border-radius:12px;border:1px solid rgba(185,166,232,0.3);font:14px 'Nunito',sans-serif;outline:none;background:#fff;"></input>
+              <input value="{{ item.url }}" onChange="{{ item.onUrlChange }}" style="flex:1;padding:9px 12px;border-radius:12px;border:1px solid rgba(185,166,232,0.3);font:13px 'Nunito',sans-serif;color:#8A7FA8;outline:none;background:#fff;"></input>
+              <div style="width:70px;text-align:center;font-size:13px;color:#8A7FA8;">{{ item.clicks }}</div>
+              <button onClick="{{ item.onToggle }}" style="{{ item.toggleStyle }}">{{ item.activeLabel }}</button>
+              <button onClick="{{ item.onRemove }}" style="border:none;background:none;cursor:pointer;color:#D496B0;font-size:16px;padding:0 4px;">✕</button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1400, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  state = {
+    view: 'public',
+    dashTab: 'overview',
+    links: [
+      {id:1,title:'Book a Consultation',url:'linkhub.co/book',clicks:482,active:true},
+      {id:2,title:'Botox & Filler Menu',url:'linkhub.co/menu',clicks:356,active:true},
+      {id:3,title:'Before & After Gallery',url:'linkhub.co/gallery',clicks:298,active:true},
+      {id:4,title:'Skincare Shop',url:'linkhub.co/shop',clicks:210,active:true},
+      {id:5,title:'Client Reviews',url:'linkhub.co/reviews',clicks:150,active:true},
+      {id:6,title:'Instagram',url:'instagram.com/bellaaesthetics',clicks:640,active:true},
+      {id:7,title:'TikTok',url:'tiktok.com/@bellaaesthetics',clicks:410,active:true},
+    ],
+    newTitle:'',
+    newUrl:'',
+    nextId:8,
+    pulseId:null,
+  };
+
+  setView = (v) => this.setState({view:v});
+  setDashTab = (t) => this.setState({dashTab:t});
+  goPublic = () => this.setState({view:'public'});
+  goDashboard = () => this.setState({view:'dashboard'});
+  goOverview = () => this.setState({dashTab:'overview'});
+  goLinksTab = () => this.setState({dashTab:'links'});
+
+  clickLink = (id) => {
+    this.setState(s => ({links: s.links.map(l => l.id===id ? {...l, clicks:l.clicks+1} : l), pulseId:id}));
+    setTimeout(() => this.setState(s => s.pulseId===id ? {pulseId:null} : null), 900);
+  };
+
+  moveUp = (idx) => {
+    if (idx<=0) return;
+    this.setState(s => { const arr=[...s.links]; [arr[idx-1],arr[idx]]=[arr[idx],arr[idx-1]]; return {links:arr}; });
+  };
+  moveDown = (idx) => {
+    this.setState(s => {
+      if (idx>=s.links.length-1) return null;
+      const arr=[...s.links]; [arr[idx+1],arr[idx]]=[arr[idx],arr[idx+1]]; return {links:arr};
+    });
+  };
+  toggleActive = (id) => this.setState(s => ({links: s.links.map(l => l.id===id ? {...l, active: !l.active} : l)}));
+  removeLink = (id) => this.setState(s => ({links: s.links.filter(l => l.id!==id)}));
+  updateNewTitle = (e) => this.setState({newTitle: e.target.value});
+  updateNewUrl = (e) => this.setState({newUrl: e.target.value});
+  addLink = () => {
+    const {newTitle, newUrl} = this.state;
+    if (!newTitle.trim()) return;
+    this.setState(s => ({
+      links: [...s.links, {id:s.nextId, title:s.newTitle.trim(), url:(s.newUrl.trim()||'linkhub.co/new-link'), clicks:0, active:true}],
+      newTitle:'', newUrl:'', nextId:s.nextId+1
+    }));
+  };
+  updateLinkField = (id, field, value) => this.setState(s => ({links: s.links.map(l => l.id===id ? {...l, [field]:value} : l)}));
+
+  renderVals() {
+    const { links, view, dashTab, pulseId } = this.state;
+    const activeLinksRaw = links.filter(l => l.active);
+    const maxClicks = Math.max(...links.map(l => l.clicks), 1);
+
+    const activeLinks = activeLinksRaw.map(l => ({...l, isPulse: l.id===pulseId, scale: l.id===pulseId ? 1.04 : 1, onClick: () => this.clickLink(l.id)}));
+    const sortedLinks = [...links].sort((a,b) => b.clicks-a.clicks).map(l => ({...l, pct: Math.round(l.clicks/maxClicks*100)}));
+    const linksWithMeta = links.map((l, idx) => ({
+      ...l,
+      activeLabel: l.active ? 'Live' : 'Hidden',
+      toggleStyle: `border:none;border-radius:999px;padding:6px 12px;font:700 11px 'Nunito',sans-serif;cursor:pointer;white-space:nowrap;background:${l.active ? '#DCE9F9' : '#EEE9F5'};color:${l.active ? '#5C7FA8' : '#8A7FA8'};`,
+      onMoveUp: () => this.moveUp(idx),
+      onMoveDown: () => this.moveDown(idx),
+      onToggle: () => this.toggleActive(l.id),
+      onRemove: () => this.removeLink(l.id),
+      onTitleChange: (e) => this.updateLinkField(l.id, 'title', e.target.value),
+      onUrlChange: (e) => this.updateLinkField(l.id, 'url', e.target.value),
+    }));
+
+    const totalClicks = links.reduce((s,l) => s+l.clicks, 0);
+    const profileViews = 8204;
+    const ctr = Math.round(totalClicks/profileViews*100);
+    const topLink = sortedLinks[0] || {title:'—', clicks:0};
+
+    const series = [120,140,110,180,200,175,220,260,240,300,280,320,350,410];
+    const w=600, h=160, pad=10;
+    const maxS = Math.max(...series), minS = Math.min(...series);
+    const stepX = (w-pad*2)/(series.length-1);
+    const pts = series.map((v,i) => {
+      const x = pad+i*stepX;
+      const y = h-pad-((v-minS)/((maxS-minS)||1))*(h-pad*2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+    const chartPoints = pts.join(' ');
+    const areaPoints = `${pad},${h-pad} ${pts.join(' ')} ${w-pad},${h-pad}`;
+
+    const devices = [{label:'Mobile',pct:78},{label:'Desktop',pct:17},{label:'Tablet',pct:5}];
+    const locations = [{label:'United States',pct:42},{label:'Canada',pct:18},{label:'United Kingdom',pct:12},{label:'Australia',pct:9},{label:'Other',pct:19}];
+    const referrals = [{label:'Instagram',pct:46},{label:'TikTok',pct:24},{label:'Direct',pct:15},{label:'Google',pct:9},{label:'Other',pct:6}];
+
+    const active = "background:#372F4D;color:#fff;border:none;border-radius:999px;padding:8px 18px;font:700 13px 'Nunito',sans-serif;cursor:pointer;";
+    const inactive = "background:transparent;color:#6B5F94;border:none;border-radius:999px;padding:8px 18px;font:600 13px 'Nunito',sans-serif;cursor:pointer;";
+    const navActive = "text-align:left;background:rgba(255,255,255,0.55);color:#372F4D;border:none;border-radius:14px;padding:11px 14px;font:700 13px 'Nunito',sans-serif;cursor:pointer;";
+    const navInactive = "text-align:left;background:transparent;color:#fff;opacity:.85;border:none;border-radius:14px;padding:11px 14px;font:600 13px 'Nunito',sans-serif;cursor:pointer;";
+
+    return {
+      view, isPublic: view==='public', isDashboard: view==='dashboard', setView: this.setView,
+      dashTab, isOverview: dashTab==='overview', isLinksTab: dashTab==='links', setDashTab: this.setDashTab,
+      publicBtnStyle: view==='public' ? active : inactive,
+      dashBtnStyle: view==='dashboard' ? active : inactive,
+      navOverviewStyle: dashTab==='overview' ? navActive : navInactive,
+      navLinksStyle: dashTab==='links' ? navActive : navInactive,
+      goPublic: this.goPublic, goDashboard: this.goDashboard,
+      goOverview: this.goOverview, goLinksTab: this.goLinksTab,
+      activeLinks, sortedLinks, linksWithMeta, totalClicks, profileViews, ctr, topLink,
+      chartPoints, areaPoints, devices, locations, referrals,
+      clickLink: this.clickLink, moveUp: this.moveUp, moveDown: this.moveDown,
+      toggleActive: this.toggleActive, removeLink: this.removeLink,
+      newTitle: this.state.newTitle, newUrl: this.state.newUrl,
+      updateNewTitle: this.updateNewTitle, updateNewUrl: this.updateNewUrl, addLink: this.addLink,
+      updateLinkField: this.updateLinkField,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
