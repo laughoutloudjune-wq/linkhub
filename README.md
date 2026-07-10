@@ -22,16 +22,24 @@ npm run dev
 3. Set **Root Directory** to `app`.
 4. Framework preset: Vite (auto-detected).
 5. Add environment variables in Vercel project settings:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-   (values are in `app/.env`)
+   - `VITE_SUPABASE_URL` — values are in `app/.env`
+   - `VITE_SUPABASE_ANON_KEY` — values are in `app/.env`
+   - `SUPABASE_URL` — same value as above, **without** the `VITE_` prefix so it stays server-only (used by `app/api/track.ts`)
+   - `SUPABASE_SERVICE_ROLE_KEY` — from Supabase Dashboard → Project Settings → API → `service_role` secret key. **Never** prefix this with `VITE_` — that would ship it into the client bundle and give visitors full database write access.
 6. Deploy. `app/vercel.json` handles SPA routing (rewrites all paths to `index.html` so React Router works on refresh/direct links).
 
 ## Data model
 - `profiles` — one per clinic owner (id = auth user id), includes `accent_color`, `background_type`/`background_value` for theming.
 - `links` — link title/url/position/active, owned by a profile.
-- `click_events` — one row per link click, with `source`/`campaign` (from UTM params) and `referrer`/`device` for attribution.
-- `page_view_events` — one row per public-page visit, same attribution fields, used for the Profile Views stat.
+- `click_events` — one row per link click, with `source`/`campaign` (from UTM params), `referrer`/`device` for attribution, and `country`/`city` from geo-IP.
+- `page_view_events` — one row per public-page visit, same fields, used for the Profile Views stat.
+
+## Tracking pipeline
+The public page never writes to `click_events`/`page_view_events` directly (RLS blocks it). Instead it POSTs to `app/api/track.ts`, a Vercel Edge Function that:
+1. Reads the visitor's city/country from Vercel's edge network (`x-vercel-ip-city`/`x-vercel-ip-country` headers) — free, no external API, no rate limits.
+2. Inserts the event using the Supabase service-role key (server-side only, bypasses RLS).
+
+There's also an unused Supabase Edge Function at `supabase/functions/track/` from an earlier iteration that resolved country via `ipwho.is`/`freeipapi.com` — kept for reference but superseded by the Vercel version above, which is faster and gets city-level data for free.
 
 ## Routes
 - `/:slug` — public link page (unauthenticated)
@@ -40,5 +48,4 @@ npm run dev
 
 ## Not yet implemented
 - Owner signup flow (accounts currently need to be created directly in Supabase Auth + a matching `profiles` row)
-- Geo-IP → country resolution for the Location breakdown chart (needs a Supabase Edge Function; `country` column exists but is unpopulated)
 - Custom short-domain redirects for shareable per-platform links

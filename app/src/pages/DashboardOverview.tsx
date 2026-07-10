@@ -79,7 +79,10 @@ export default function DashboardOverview() {
 
   const deviceCounts = useMemo(() => groupBy(clicks, (c) => c.device ?? 'Unknown'), [clicks])
   const sourceCounts = useMemo(() => groupBy(clicks, (c) => c.source ?? 'Direct'), [clicks])
-  const countryCounts = useMemo(() => groupBy(clicks, (c) => c.country ?? 'Unknown'), [clicks])
+  const locationCounts = useMemo(
+    () => groupBy(clicks, (c) => c.city ?? c.country ?? 'Unknown'),
+    [clicks],
+  )
 
   const last14Days = useMemo(() => {
     const days: { date: string; count: number }[] = []
@@ -161,7 +164,7 @@ export default function DashboardOverview() {
         <div className="rounded-2xl border border-black/5 bg-white p-5">
           <div className="mb-3 text-sm font-medium">Location</div>
           <div className="flex flex-col gap-3">
-            {topEntries(countryCounts).map(([label, count]) => (
+            {topEntries(locationCounts).map(([label, count]) => (
               <BarRow
                 key={label}
                 label={label}

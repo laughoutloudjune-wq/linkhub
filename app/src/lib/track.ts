@@ -1,5 +1,3 @@
-import { supabase } from './supabase'
-
 interface TrackParams {
   type: 'page_view' | 'click'
   profileId: string
@@ -11,17 +9,19 @@ interface TrackParams {
 }
 
 export function trackEvent({ type, profileId, linkId, source, campaign, referrer, device }: TrackParams) {
-  supabase.functions
-    .invoke('track', {
-      body: {
-        type,
-        profile_id: profileId,
-        link_id: linkId,
-        source,
-        campaign,
-        referrer,
-        device,
-      },
-    })
-    .then()
+  fetch('/api/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type,
+      profile_id: profileId,
+      link_id: linkId,
+      source,
+      campaign,
+      referrer,
+      device,
+    }),
+  }).catch(() => {
+    // Tracking is best-effort — never let a failed beacon affect the visitor's experience.
+  })
 }

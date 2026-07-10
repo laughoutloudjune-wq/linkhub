@@ -31,5 +31,6 @@ export interface ClickEvent {
   referrer: string | null
   device: string | null
   country: string | null
+  city: string | null
   created_at: string
 }
