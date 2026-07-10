@@ -32,5 +32,8 @@ export interface ClickEvent {
   device: string | null
   country: string | null
   city: string | null
+  region: string | null
+  latitude: number | null
+  longitude: number | null
   created_at: string
 }

@@ -80,7 +80,11 @@ export default function DashboardOverview() {
   const deviceCounts = useMemo(() => groupBy(clicks, (c) => c.device ?? 'Unknown'), [clicks])
   const sourceCounts = useMemo(() => groupBy(clicks, (c) => c.source ?? 'Direct'), [clicks])
   const locationCounts = useMemo(
-    () => groupBy(clicks, (c) => c.city ?? c.country ?? 'Unknown'),
+    () =>
+      groupBy(clicks, (c) => {
+        if (c.city && c.region) return `${c.city}, ${c.region}`
+        return c.city ?? c.country ?? 'Unknown'
+      }),
     [clicks],
   )
 

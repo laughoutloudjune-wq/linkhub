@@ -33,10 +33,16 @@ export default async function handler(request: Request) {
   }
 
   // Vercel's edge network resolves these from the visitor's IP automatically —
-  // no external API call, no rate limits, and city-level instead of just country.
+  // no external API call, no rate limits. Still IP-derived (usually the ISP's
+  // city centroid), not GPS-precise — good enough for regional ad targeting,
+  // not for street-level location.
   const decode = (v: string | null) => (v ? decodeURIComponent(v) : null)
+  const toFloat = (v: string | null) => (v ? Number.parseFloat(v) : null)
   const country = decode(request.headers.get('x-vercel-ip-country'))
   const city = decode(request.headers.get('x-vercel-ip-city'))
+  const region = decode(request.headers.get('x-vercel-ip-country-region'))
+  const latitude = toFloat(request.headers.get('x-vercel-ip-latitude'))
+  const longitude = toFloat(request.headers.get('x-vercel-ip-longitude'))
 
   const table = body.type === 'page_view' ? 'page_view_events' : 'click_events'
   const payload: Record<string, unknown> = {
@@ -47,6 +53,9 @@ export default async function handler(request: Request) {
     device: body.device ?? null,
     country,
     city,
+    region,
+    latitude,
+    longitude,
   }
   if (table === 'click_events') payload.link_id = body.link_id
 
