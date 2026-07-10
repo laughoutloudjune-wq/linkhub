@@ -36,6 +36,7 @@ export default function PublicPage() {
         .eq('profile_id', profileData.id)
         .eq('active', true)
         .order('position', { ascending: true })
+        .order('created_at', { ascending: true })
 
       if (!cancelled) setLinks(linksData ?? [])
       setLoading(false)
@@ -65,8 +66,14 @@ export default function PublicPage() {
     setTimeout(() => setTrackedLinkId(null), 1000)
 
     // Open synchronously, in the same click-gesture tick — awaiting the
-    // tracking call first causes browsers to block the popup.
-    window.open(link.url, '_blank', 'noopener,noreferrer')
+    // tracking call first causes browsers to block the popup. tel:/mailto:
+    // links use the current tab: opening the phone dialer or mail app in a
+    // new browser tab is unreliable, especially on mobile.
+    if (link.url.startsWith('tel:') || link.url.startsWith('mailto:')) {
+      window.location.href = link.url
+    } else {
+      window.open(link.url, '_blank', 'noopener,noreferrer')
+    }
 
     trackEvent({
       type: 'click',
