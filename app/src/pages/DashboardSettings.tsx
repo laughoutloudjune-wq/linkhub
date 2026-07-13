@@ -144,6 +144,8 @@ export default function DashboardSettings() {
   const [accentColor, setAccentColor] = useState(profile?.accent_color ?? '#E7A8A3')
   const [backgroundType, setBackgroundType] = useState<BackgroundType>(profile?.background_type ?? 'color')
   const [backgroundValue, setBackgroundValue] = useState(profile?.background_value ?? '#FBF4F1')
+  const [buttonTextColor, setButtonTextColor] = useState(profile?.button_text_color ?? '#FFFFFF')
+  const [buttonFontSize, setButtonFontSize] = useState(profile?.button_font_size ?? 15)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -160,6 +162,8 @@ export default function DashboardSettings() {
     setAccentColor(profile.accent_color)
     setBackgroundType(profile.background_type)
     setBackgroundValue(profile.background_value)
+    setButtonTextColor(profile.button_text_color)
+    setButtonFontSize(profile.button_font_size)
   }, [profile])
 
   async function handleSave() {
@@ -176,6 +180,8 @@ export default function DashboardSettings() {
         accent_color: accentColor,
         background_type: backgroundType,
         background_value: backgroundValue,
+        button_text_color: buttonTextColor,
+        button_font_size: buttonFontSize,
       })
       .eq('id', session.user.id)
     if (error) {
@@ -371,14 +377,40 @@ export default function DashboardSettings() {
       </div>
 
       <div>
+        <h2 className="mb-3 text-sm font-medium">Link button text</h2>
+        <div className="flex flex-wrap items-center gap-6">
+          <label className="flex flex-col gap-1 text-xs text-neutral-500">
+            Text color
+            <input
+              type="color"
+              value={buttonTextColor}
+              onChange={(e) => setButtonTextColor(e.target.value)}
+              className="h-10 w-20 cursor-pointer rounded-lg border border-black/10"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-neutral-500">
+            Font size ({buttonFontSize}px)
+            <input
+              type="range"
+              min={12}
+              max={22}
+              value={buttonFontSize}
+              onChange={(e) => setButtonFontSize(Number(e.target.value))}
+              className="w-40"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div>
         <h2 className="mb-3 text-sm font-medium">Preview</h2>
         <div
-          className="flex h-32 w-full items-center justify-center rounded-2xl text-sm font-semibold text-white"
+          className="flex h-32 w-full items-center justify-center rounded-2xl"
           style={{ background: previewBackground }}
         >
           <span
-            className="rounded-full px-4 py-2"
-            style={{ background: accentColor }}
+            className="rounded-full px-4 py-2 font-semibold"
+            style={{ background: accentColor, color: buttonTextColor, fontSize: `${buttonFontSize}px` }}
           >
             Sample link button
           </span>

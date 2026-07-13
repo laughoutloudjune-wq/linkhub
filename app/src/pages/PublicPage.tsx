@@ -117,10 +117,14 @@ export default function PublicPage() {
                 target={link.url.startsWith('tel:') || link.url.startsWith('mailto:') ? undefined : '_blank'}
                 rel="noopener noreferrer"
                 onClick={() => handleLinkClick(link)}
-                className="relative flex w-full items-center justify-center gap-2 rounded-full py-4 text-[15px] font-semibold text-white transition-transform active:scale-[1.04]"
-                style={{ background: 'var(--accent)' }}
+                className="relative flex w-full items-center justify-center gap-2 rounded-full py-4 font-semibold transition-transform active:scale-[1.04]"
+                style={{
+                  background: 'var(--accent)',
+                  color: profile.button_text_color,
+                  fontSize: `${profile.button_font_size}px`,
+                }}
               >
-                <PlatformIcon url={link.url} className="h-4 w-4 shrink-0" />
+                <PlatformIcon url={link.url} className="h-[1.2em] w-[1.2em] shrink-0" />
                 {link.title}
               </a>
             </div>

@@ -10,6 +10,8 @@ export interface Profile {
   background_type: BackgroundType
   background_value: string
   custom_platforms: string[]
+  button_text_color: string
+  button_font_size: number
   created_at: string
 }
 
