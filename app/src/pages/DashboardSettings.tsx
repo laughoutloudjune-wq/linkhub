@@ -146,6 +146,8 @@ export default function DashboardSettings() {
   const [backgroundValue, setBackgroundValue] = useState(profile?.background_value ?? '#FBF4F1')
   const [buttonTextColor, setButtonTextColor] = useState(profile?.button_text_color ?? '#FFFFFF')
   const [buttonFontSize, setButtonFontSize] = useState(profile?.button_font_size ?? 15)
+  const [bioTextColor, setBioTextColor] = useState(profile?.bio_text_color ?? '#8A7570')
+  const [bioFontSize, setBioFontSize] = useState(profile?.bio_font_size ?? 14)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -164,6 +166,8 @@ export default function DashboardSettings() {
     setBackgroundValue(profile.background_value)
     setButtonTextColor(profile.button_text_color)
     setButtonFontSize(profile.button_font_size)
+    setBioTextColor(profile.bio_text_color)
+    setBioFontSize(profile.bio_font_size)
   }, [profile])
 
   async function handleSave() {
@@ -182,6 +186,8 @@ export default function DashboardSettings() {
         background_value: backgroundValue,
         button_text_color: buttonTextColor,
         button_font_size: buttonFontSize,
+        bio_text_color: bioTextColor,
+        bio_font_size: bioFontSize,
       })
       .eq('id', session.user.id)
     if (error) {
@@ -303,6 +309,28 @@ export default function DashboardSettings() {
               className="rounded-lg border border-black/10 px-3 py-2 text-sm text-black"
             />
           </label>
+          <div className="flex flex-wrap items-center gap-6">
+            <label className="flex flex-col gap-1 text-xs text-neutral-500">
+              Bio text color
+              <input
+                type="color"
+                value={bioTextColor}
+                onChange={(e) => setBioTextColor(e.target.value)}
+                className="h-10 w-20 cursor-pointer rounded-lg border border-black/10"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-neutral-500">
+              Bio font size ({bioFontSize}px)
+              <input
+                type="range"
+                min={11}
+                max={20}
+                value={bioFontSize}
+                onChange={(e) => setBioFontSize(Number(e.target.value))}
+                className="w-40"
+              />
+            </label>
+          </div>
         </div>
       </div>
 

@@ -102,7 +102,11 @@ export default function PublicPage() {
             ✓
           </span>
         </div>
-        {profile.bio && <p className="mt-1 text-sm text-[var(--muted,#8A7570)]">{profile.bio}</p>}
+        {profile.bio && (
+          <p className="mt-1" style={{ color: profile.bio_text_color, fontSize: `${profile.bio_font_size}px` }}>
+            {profile.bio}
+          </p>
+        )}
 
         <div className="mt-8 w-full flex flex-col gap-3.5">
           {links.map((link) => (

@@ -12,6 +12,8 @@ export interface Profile {
   custom_platforms: string[]
   button_text_color: string
   button_font_size: number
+  bio_text_color: string
+  bio_font_size: number
   created_at: string
 }
 
