@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { captureAttribution, getPlatform } from '../lib/attribution'
 import { trackEvent } from '../lib/track'
 import { ThemeVars } from '../components/ThemeVars'
+import { PlatformIcon } from '../components/PlatformIcon'
 import type { Link, Profile } from '../types'
 
 export default function PublicPage() {
@@ -65,16 +66,11 @@ export default function PublicPage() {
     setTrackedLinkId(link.id)
     setTimeout(() => setTrackedLinkId(null), 1000)
 
-    // Open synchronously, in the same click-gesture tick — awaiting the
-    // tracking call first causes browsers to block the popup. tel:/mailto:
-    // links use the current tab: opening the phone dialer or mail app in a
-    // new browser tab is unreliable, especially on mobile.
-    if (link.url.startsWith('tel:') || link.url.startsWith('mailto:')) {
-      window.location.href = link.url
-    } else {
-      window.open(link.url, '_blank', 'noopener,noreferrer')
-    }
-
+    // Navigation happens via the anchor tag's native href — not
+    // programmatically here. window.open() is subject to popup blockers
+    // (ad blockers in particular commonly block it on desktop even for
+    // direct clicks), while a real <a> click is treated as genuine
+    // navigation and isn't blocked the same way.
     trackEvent({
       type: 'click',
       profileId: profile.id,
@@ -116,13 +112,17 @@ export default function PublicPage() {
                   Click tracked
                 </div>
               )}
-              <button
+              <a
+                href={link.url}
+                target={link.url.startsWith('tel:') || link.url.startsWith('mailto:') ? undefined : '_blank'}
+                rel="noopener noreferrer"
                 onClick={() => handleLinkClick(link)}
-                className="w-full rounded-full py-4 text-[15px] font-semibold text-white transition-transform active:scale-[1.04]"
+                className="relative flex w-full items-center justify-center gap-2 rounded-full py-4 text-[15px] font-semibold text-white transition-transform active:scale-[1.04]"
                 style={{ background: 'var(--accent)' }}
               >
+                <PlatformIcon url={link.url} className="h-4 w-4 shrink-0" />
                 {link.title}
-              </button>
+              </a>
             </div>
           ))}
         </div>
