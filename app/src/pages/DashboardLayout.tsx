@@ -11,10 +11,24 @@ const navItems = [
 
 export default function DashboardLayout() {
   const { session, loading: authLoading } = useAuth()
-  const { profile } = useProfile(session?.user.id, session?.user.email)
+  const { profile, loading: profileLoading, unauthorized } = useProfile(session?.user.id, session?.user.email)
 
   if (authLoading) return <div className="p-10 text-center text-sm text-neutral-500">Loading…</div>
   if (!session) return <Navigate to="/login" replace />
+
+  if (!profileLoading && unauthorized) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-sm flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="text-sm text-neutral-600">
+          This account isn't authorized to access this dashboard. This site manages a single business, already
+          owned by another account.
+        </p>
+        <button onClick={() => supabase.auth.signOut()} className="text-sm font-medium text-neutral-700 underline">
+          Sign out
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="flex min-h-screen">

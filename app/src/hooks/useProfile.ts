@@ -34,14 +34,25 @@ async function bootstrapProfile(userId: string, email: string | undefined): Prom
 export function useProfile(userId: string | undefined, userEmail: string | undefined) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [unauthorized, setUnauthorized] = useState(false)
 
   async function refresh() {
     if (!userId) return
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
     if (data) {
       setProfile(data)
+      setUnauthorized(false)
       return
     }
+
+    // This app hosts a single business. Only the first account to log in may
+    // bootstrap that business's profile; any other account is not authorized.
+    const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+    if (count && count > 0) {
+      setUnauthorized(true)
+      return
+    }
+
     const created = await bootstrapProfile(userId, userEmail)
     setProfile(created)
   }
@@ -56,5 +67,5 @@ export function useProfile(userId: string | undefined, userEmail: string | undef
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
-  return { profile, loading, refresh }
+  return { profile, loading, unauthorized, refresh }
 }
