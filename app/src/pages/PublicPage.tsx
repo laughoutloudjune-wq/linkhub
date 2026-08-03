@@ -93,20 +93,32 @@ export default function PublicPage() {
         ) : (
           <div className="h-22 w-22 rounded-full bg-[repeating-linear-gradient(45deg,#ddd,#ddd_4px,#eee_4px,#eee_8px)]" />
         )}
-        <div className="mt-4 flex items-center gap-1.5">
-          <h1 className="text-[27px] font-semibold">{profile.name}</h1>
-          <span
-            className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] text-white"
-            style={{ background: 'var(--accent)' }}
-          >
-            ✓
-          </span>
+        <div
+          className="relative mt-4 flex flex-col items-center px-8 py-5"
+          style={
+            profile.background_type === 'image'
+              ? {
+                  background:
+                    'radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.55) 45%, rgba(255,255,255,0) 75%)',
+                }
+              : undefined
+          }
+        >
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-[27px] font-semibold">{profile.name}</h1>
+            <span
+              className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] text-white"
+              style={{ background: 'var(--accent)' }}
+            >
+              ✓
+            </span>
+          </div>
+          {profile.bio && (
+            <p className="mt-1" style={{ color: profile.bio_text_color, fontSize: `${profile.bio_font_size}px` }}>
+              {profile.bio}
+            </p>
+          )}
         </div>
-        {profile.bio && (
-          <p className="mt-1" style={{ color: profile.bio_text_color, fontSize: `${profile.bio_font_size}px` }}>
-            {profile.bio}
-          </p>
-        )}
 
         <div className="mt-8 w-full flex flex-col gap-3.5">
           {links.map((link) => (
