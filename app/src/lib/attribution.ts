@@ -44,9 +44,7 @@ export function captureAttribution(): Attribution {
   return attribution
 }
 
-export function getPlatform(): string {
-  const ua = navigator.userAgent
-
+function detectOS(ua: string): string {
   if (/iPhone/i.test(ua)) return 'iOS'
   // iPadOS 13+ reports as "Macintosh" in desktop mode, distinguishable by touch support.
   if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) return 'iPadOS'
@@ -55,4 +53,30 @@ export function getPlatform(): string {
   if (/Macintosh|Mac OS X/i.test(ua)) return 'macOS'
   if (/Linux/i.test(ua)) return 'Linux'
   return 'Other'
+}
+
+// Social apps open links in their own embedded WebView instead of the
+// system browser. That WebView's user-agent string carries a marker
+// identifying the host app — this lets us tell "opened inside Instagram"
+// apart from "opened in Safari" instead of both just showing up as iOS.
+function detectInAppBrowser(ua: string): string | null {
+  if (/Instagram/i.test(ua)) return 'Instagram'
+  if (/FBAN|FBAV|FB_IAB/i.test(ua)) return 'Facebook'
+  if (/\bLine\//i.test(ua)) return 'Line'
+  if (/MicroMessenger/i.test(ua)) return 'WeChat'
+  if (/Snapchat/i.test(ua)) return 'Snapchat'
+  if (/LinkedInApp/i.test(ua)) return 'LinkedIn'
+  if (/Pinterest/i.test(ua)) return 'Pinterest'
+  if (/Twitter/i.test(ua)) return 'Twitter/X'
+  // TikTok's in-app WebView identifies itself via the app's package name
+  // rather than a friendly "TikTok" string.
+  if (/musical_ly|BytedanceWebview|TikTok/i.test(ua)) return 'TikTok'
+  return null
+}
+
+export function getPlatform(): string {
+  const ua = navigator.userAgent
+  const os = detectOS(ua)
+  const inApp = detectInAppBrowser(ua)
+  return inApp ? `${os} · ${inApp} in-app` : os
 }
