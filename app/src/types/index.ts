@@ -42,3 +42,18 @@ export interface ClickEvent {
   longitude: number | null
   created_at: string
 }
+
+export interface PageViewEvent {
+  id: string
+  profile_id: string
+  source: string | null
+  campaign: string | null
+  referrer: string | null
+  device: string | null
+  country: string | null
+  city: string | null
+  region: string | null
+  latitude: number | null
+  longitude: number | null
+  created_at: string
+}

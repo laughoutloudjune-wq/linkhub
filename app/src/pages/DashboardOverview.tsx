@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
-import type { ClickEvent, Link } from '../types'
+import type { ClickEvent, Link, PageViewEvent } from '../types'
 
 function BarRow({ label, value, max, suffix }: { label: string; value: number; max: number; suffix: string }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0
@@ -42,7 +42,7 @@ export default function DashboardOverview() {
   const { profile } = useProfile(session?.user.id, session?.user.email)
   const [links, setLinks] = useState<Link[]>([])
   const [clicks, setClicks] = useState<ClickEvent[]>([])
-  const [profileViews, setProfileViews] = useState(0)
+  const [pageViews, setPageViews] = useState<PageViewEvent[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -50,24 +50,27 @@ export default function DashboardOverview() {
     const profileId = profile.id
 
     async function load() {
-      const [{ data: linksData }, { data: clicksData }, { count }] = await Promise.all([
+      const [{ data: linksData }, { data: clicksData }, { data: pageViewsData }] = await Promise.all([
         supabase.from('links').select('*').eq('profile_id', profileId),
         supabase.from('click_events').select('*').eq('profile_id', profileId),
-        supabase
-          .from('page_view_events')
-          .select('*', { count: 'exact', head: true })
-          .eq('profile_id', profileId),
+        supabase.from('page_view_events').select('*').eq('profile_id', profileId),
       ])
       setLinks(linksData ?? [])
       setClicks(clicksData ?? [])
-      setProfileViews(count ?? 0)
+      setPageViews(pageViewsData ?? [])
       setLoading(false)
     }
     load()
   }, [profile])
 
+  const profileViews = pageViews.length
   const totalClicks = clicks.length
   const clickRate = profileViews > 0 ? Math.round((totalClicks / profileViews) * 100) : 0
+
+  // Device/location/referral breakdowns combine page views and link clicks —
+  // a visitor who views the profile but never clicks a link still carries
+  // useful source/device/location data that would otherwise be dropped.
+  const allVisits = useMemo(() => [...pageViews, ...clicks], [pageViews, clicks])
 
   const clicksByLink = useMemo(() => {
     const counts = groupBy(clicks, (c) => c.link_id)
@@ -79,15 +82,15 @@ export default function DashboardOverview() {
   const topLink = clicksByLink[0]
   const maxLinkClicks = clicksByLink[0]?.count ?? 0
 
-  const deviceCounts = useMemo(() => groupBy(clicks, (c) => c.device ?? 'Unknown'), [clicks])
-  const sourceCounts = useMemo(() => groupBy(clicks, (c) => c.source ?? 'Direct'), [clicks])
+  const deviceCounts = useMemo(() => groupBy(allVisits, (c) => c.device ?? 'Unknown'), [allVisits])
+  const sourceCounts = useMemo(() => groupBy(allVisits, (c) => c.source ?? 'Direct'), [allVisits])
   const locationCounts = useMemo(
     () =>
-      groupBy(clicks, (c) => {
+      groupBy(allVisits, (c) => {
         if (c.city && c.region) return `${c.city}, ${c.region}`
         return c.city ?? c.country ?? 'Unknown'
       }),
-    [clicks],
+    [allVisits],
   )
 
   const last14Days = useMemo(() => {
@@ -160,7 +163,7 @@ export default function DashboardOverview() {
               <BarRow
                 key={label}
                 label={label}
-                value={Math.round((count / totalClicks) * 100) || 0}
+                value={Math.round((count / allVisits.length) * 100) || 0}
                 max={100}
                 suffix="%"
               />
@@ -174,7 +177,7 @@ export default function DashboardOverview() {
               <BarRow
                 key={label}
                 label={label}
-                value={Math.round((count / totalClicks) * 100) || 0}
+                value={Math.round((count / allVisits.length) * 100) || 0}
                 max={100}
                 suffix="%"
               />
@@ -188,7 +191,7 @@ export default function DashboardOverview() {
               <BarRow
                 key={label}
                 label={label}
-                value={Math.round((count / totalClicks) * 100) || 0}
+                value={Math.round((count / allVisits.length) * 100) || 0}
                 max={100}
                 suffix="%"
               />
