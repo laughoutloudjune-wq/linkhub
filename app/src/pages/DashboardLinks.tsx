@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useProfile } from '../hooks/useProfile'
 import { normalizeUrl } from '../lib/normalizeUrl'
 import type { Link } from '../types'
 
 export default function DashboardLinks() {
   const { session } = useAuth()
+  const { profile } = useProfile(session?.user.id, session?.user.email)
   const [links, setLinks] = useState<Link[]>([])
   const [clickCounts, setClickCounts] = useState<Record<string, number>>({})
   const [newTitle, setNewTitle] = useState('')
@@ -14,15 +16,15 @@ export default function DashboardLinks() {
   const [adding, setAdding] = useState(false)
 
   async function refresh() {
-    if (!session) return
+    if (!profile) return
     const [{ data }, { data: clickRows }] = await Promise.all([
       supabase
         .from('links')
         .select('*')
-        .eq('profile_id', session.user.id)
+        .eq('profile_id', profile.id)
         .order('position', { ascending: true })
         .order('created_at', { ascending: true }),
-      supabase.from('click_events').select('link_id').eq('profile_id', session.user.id),
+      supabase.from('click_events').select('link_id').eq('profile_id', profile.id),
     ])
     setLinks(data ?? [])
     const counts: Record<string, number> = {}
@@ -36,11 +38,11 @@ export default function DashboardLinks() {
   useEffect(() => {
     refresh()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session])
+  }, [profile])
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
-    if (!session || !newTitle.trim() || adding) return
+    if (!profile || !newTitle.trim() || adding) return
     setAdding(true)
     // Read the current max position fresh from the DB rather than from local
     // state — stale state from rapid successive adds was causing every new
@@ -49,14 +51,14 @@ export default function DashboardLinks() {
     const { data: maxRow } = await supabase
       .from('links')
       .select('position')
-      .eq('profile_id', session.user.id)
+      .eq('profile_id', profile.id)
       .order('position', { ascending: false })
       .limit(1)
       .maybeSingle()
     const nextPosition = maxRow ? maxRow.position + 1 : 0
 
     await supabase.from('links').insert({
-      profile_id: session.user.id,
+      profile_id: profile.id,
       title: newTitle.trim(),
       url: normalizeUrl(newUrl.trim()) || 'https://',
       position: nextPosition,

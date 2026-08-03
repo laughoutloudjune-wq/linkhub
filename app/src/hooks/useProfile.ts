@@ -28,6 +28,8 @@ async function bootstrapProfile(userId: string, email: string | undefined): Prom
     .single()
 
   if (error) return null
+
+  await supabase.from('profile_members').insert({ profile_id: data.id, user_id: userId, role: 'owner' })
   return data
 }
 
@@ -38,15 +40,24 @@ export function useProfile(userId: string | undefined, userEmail: string | undef
 
   async function refresh() {
     if (!userId) return
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
-    if (data) {
+
+    // Multiple accounts can manage the same business via profile_members.
+    const { data: membership } = await supabase
+      .from('profile_members')
+      .select('profile_id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (membership) {
+      const { data } = await supabase.from('profiles').select('*').eq('id', membership.profile_id).maybeSingle()
       setProfile(data)
       setUnauthorized(false)
       return
     }
 
     // This app hosts a single business. Only the first account to log in may
-    // bootstrap that business's profile; any other account is not authorized.
+    // bootstrap that business's profile; any other account needs to be added
+    // as a team member (profile_members) to get access.
     const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
     if (count && count > 0) {
       setUnauthorized(true)

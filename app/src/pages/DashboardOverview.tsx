@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useProfile } from '../hooks/useProfile'
 import type { ClickEvent, Link } from '../types'
 
 function BarRow({ label, value, max, suffix }: { label: string; value: number; max: number; suffix: string }) {
@@ -38,14 +39,15 @@ function topEntries(counts: Record<string, number>, n = 5) {
 
 export default function DashboardOverview() {
   const { session } = useAuth()
+  const { profile } = useProfile(session?.user.id, session?.user.email)
   const [links, setLinks] = useState<Link[]>([])
   const [clicks, setClicks] = useState<ClickEvent[]>([])
   const [profileViews, setProfileViews] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!session) return
-    const profileId = session.user.id
+    if (!profile) return
+    const profileId = profile.id
 
     async function load() {
       const [{ data: linksData }, { data: clicksData }, { count }] = await Promise.all([
@@ -62,7 +64,7 @@ export default function DashboardOverview() {
       setLoading(false)
     }
     load()
-  }, [session])
+  }, [profile])
 
   const totalClicks = clicks.length
   const clickRate = profileViews > 0 ? Math.round((totalClicks / profileViews) * 100) : 0

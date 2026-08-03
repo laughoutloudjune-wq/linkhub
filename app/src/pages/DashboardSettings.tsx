@@ -171,7 +171,7 @@ export default function DashboardSettings() {
   }, [profile])
 
   async function handleSave() {
-    if (!session) return
+    if (!profile) return
     setSaving(true)
     setError(null)
     const { error } = await supabase
@@ -189,7 +189,7 @@ export default function DashboardSettings() {
         bio_text_color: bioTextColor,
         bio_font_size: bioFontSize,
       })
-      .eq('id', session.user.id)
+      .eq('id', profile.id)
     if (error) {
       setError(error.code === '23505' ? 'That URL slug is already taken.' : error.message)
     } else {
@@ -224,7 +224,7 @@ export default function DashboardSettings() {
   }
 
   async function handleResetStats() {
-    if (!session) return
+    if (!profile) return
     const confirmed = confirm(
       'This permanently deletes all click and profile-view history. Your links and settings are untouched. This cannot be undone. Continue?',
     )
@@ -233,8 +233,8 @@ export default function DashboardSettings() {
     setResetting(true)
     setResetMessage(null)
     const [clicksResult, viewsResult] = await Promise.all([
-      supabase.from('click_events').delete().eq('profile_id', session.user.id),
-      supabase.from('page_view_events').delete().eq('profile_id', session.user.id),
+      supabase.from('click_events').delete().eq('profile_id', profile.id),
+      supabase.from('page_view_events').delete().eq('profile_id', profile.id),
     ])
     setResetting(false)
     setResetMessage(
