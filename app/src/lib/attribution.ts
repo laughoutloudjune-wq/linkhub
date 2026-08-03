@@ -21,6 +21,18 @@ function deriveSourceFromReferrer(referrer: string): string | null {
   }
 }
 
+const IN_APP_SOURCE_KEY: Record<string, string> = {
+  Instagram: 'instagram',
+  Facebook: 'facebook',
+  Line: 'line',
+  WeChat: 'wechat',
+  Snapchat: 'snapchat',
+  LinkedIn: 'linkedin',
+  Pinterest: 'pinterest',
+  'Twitter/X': 'twitter',
+  TikTok: 'tiktok',
+}
+
 export function captureAttribution(): Attribution {
   const params = new URLSearchParams(window.location.search)
   const utmSource = params.get('utm_source')
@@ -34,8 +46,14 @@ export function captureAttribution(): Attribution {
     return JSON.parse(existing) as Attribution
   }
 
+  // In-app browsers (Instagram, TikTok, etc.) commonly strip the referrer
+  // header for external links, so a click opened from inside one of those
+  // apps would otherwise show up as "Direct" — fall back to sniffing the
+  // WebView's own user-agent marker to recover the real source.
+  const inApp = detectInAppBrowser(navigator.userAgent)
+
   const attribution: Attribution = {
-    source: utmSource ?? deriveSourceFromReferrer(referrer ?? ''),
+    source: utmSource ?? deriveSourceFromReferrer(referrer ?? '') ?? (inApp ? IN_APP_SOURCE_KEY[inApp] : null),
     campaign: utmCampaign ?? null,
     referrer,
   }
